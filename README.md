@@ -1,4 +1,4 @@
-#### 🧠 JUNIXION MedRisk.AI
+## 🧠 JUNIXION MedRisk.AI
 
 AI 기반 암환자 맞춤형 의료비 예측 및 보험사 추천 시스템
 
