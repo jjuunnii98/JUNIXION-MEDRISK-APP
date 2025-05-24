@@ -17,10 +17,8 @@ from model.utils import (
     log_risk_score
 )
 
-# ✅ 한글 폰트 설정
-font_path = "/System/Library/Fonts/Supplemental/AppleGothic.ttf"
-font_prop = fm.FontProperties(fname=font_path)
-plt.rcParams["font.family"] = font_prop.get_name()
+# ✅ Streamlit Cloud용 기본 폰트 설정
+plt.rcParams["font.family"] = "DejaVu Sans"
 
 # ✅ 기본 설정
 st.set_page_config(page_title="JUNIXION - 의료비 예측", layout="wide")
