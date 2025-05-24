@@ -1,0 +1,12 @@
+데이터 출처
+
+
+- HIRA 암환자 진료현황: https://opendata.hira.or.kr/op/opc/olapHthInsRvStatInfoTab15.do?docNo=03-022#
+
+- KOSIS 연령별 소득 통계: https://kosis.kr/statHtml/statHtml.do?sso=ok&returnurl=https%3A%2F%2Fkosis.kr%3A443%2FstatHtml%2FstatHtml.do%3Flist_id%3DG_A_10_003_001%26obj_var_id%3D%26seqNo%3D%26tblId%3DDT_1L9U003%26vw_cd%3DMT_ZTITLE%26orgId%3D101%26path%3D%252FstatisticsList%252FstatisticsListIndex.do%26conn_path%3DMT_ZTITLE%26itm_id%3D%26lang_mode%3Dko%26scrId%3D%26
+
+- 암 생존율: https://www.cancer.go.kr/lay1/S1T648C649/contents.do
+
+- 5년 상대생존율: https://www.cancer.go.kr/lay1/S1T648C650/contents.do
+
+- 요약병기별 생존율: https://www.cancer.go.kr/lay1/S1T648C652/contents.do
