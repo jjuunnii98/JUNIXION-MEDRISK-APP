@@ -1,4 +1,4 @@
-# app.py
+# app.py (최종 수정본: SHAP/시각화 축소 및 centered 레이아웃)
 
 import streamlit as st
 import pandas as pd
@@ -28,8 +28,8 @@ try:
 except Exception as e:
     st.warning(f"⚠️ 폰트 설정 오류: {e}")
 
-# ✅ 페이지 기본 설정
-st.set_page_config(page_title="JUNIXION MedRisk.AI", layout="wide")
+# ✅ 페이지 기본 설정 (wide → centered)
+st.set_page_config(page_title="JUNIXION MedRisk.AI", layout="centered")
 st.title("JUNIXION MedRisk.AI")
 st.caption("AI 기반 암환자 맞춤형 의료비 예측 및 보험사 추천 시스템")
 
@@ -123,7 +123,7 @@ if st.button("의료예측 및 보험 추천"):
                 ],
             }
         ))
-        st.plotly_chart(fig_gauge, use_container_width=True)
+        st.plotly_chart(fig_gauge, use_container_width=False)  # 🔽 폭 제한
 
         # ✅ SHAP 시각화
         st.subheader("SHAP 변수 영향력")
@@ -133,31 +133,31 @@ if st.button("의료예측 및 보험 추천"):
             shap_vals = shap_values.values[0]
             feature_names = X_input.columns.tolist()
 
-            fig, ax = plt.subplots(figsize=(3.5, 2.5))
+            fig, ax = plt.subplots(figsize=(2.5, 1.5))  # 🔽 축소
             colors = ['#FF6384' if val > 0 else '#36A2EB' for val in shap_vals]
             bars = ax.barh(feature_names, shap_vals, color=colors)
-            ax.set_title("SHAP 영향도", fontsize=11)
-            ax.tick_params(labelsize=9)
+            ax.set_title("SHAP 영향도", fontsize=9)
+            ax.tick_params(labelsize=7)
             for i, (bar, val) in enumerate(zip(bars, shap_vals)):
                 xpos = bar.get_width()
                 ha = 'left' if xpos > 0 else 'right'
-                ax.text(xpos, bar.get_y() + bar.get_height()/2, f'{val:+.0f}', va='center', ha=ha, fontsize=8)
+                ax.text(xpos, bar.get_y() + bar.get_height()/2, f'{val:+.0f}', va='center', ha=ha, fontsize=6)
             plt.tight_layout()
-            st.pyplot(fig)
+            st.pyplot(fig, use_container_width=False)
         except Exception as e:
             st.warning(f"SHAP 시각화 오류: {e}")
 
         # ✅ 요약 바 차트
         st.subheader("예측 진료비 vs 연소득")
-        fig1, ax1 = plt.subplots(figsize=(3, 2.2))
+        fig1, ax1 = plt.subplots(figsize=(2.5, 1.8))
         labels = ["예측 진료비", "연소득"]
         values = [result_dict["raw_cost"], result_dict["raw_income"]]
         colors = ["#FF9999", "#99CCFF"]
         ax1.bar(labels, values, color=colors)
         for i, v in enumerate(values):
-            ax1.text(i, v + v * 0.01, f"{v:,}", ha='center', fontsize=9)
+            ax1.text(i, v + v * 0.01, f"{v:,}", ha='center', fontsize=8)
         ax1.set_ylabel("금액 (원)")
-        st.pyplot(fig1)
+        st.pyplot(fig1, use_container_width=False)
 
         # ✅ 보험사 추천
         st.subheader("추천 보험사")
