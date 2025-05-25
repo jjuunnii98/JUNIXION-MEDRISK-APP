@@ -12,7 +12,7 @@ AI 기반 암환자 맞춤형 의료비 예측 및 보험사 추천 시스템
 **JUNIXION MedRisk.AI**는 암환자 개인의 기본정보를 바탕으로 예상 의료비를 예측하고, 소득 대비 의료비 부담률에 따른 위험등급을 산정하여, 사용자 맞춤형 보험사를 추천하는 **AI 기반 헬스케어 플랫폼**입니다.
 
 ## 🚀 배포 주소
-👉 [실행하러 가기](https://junixion-medrisk-app.streamlit.app/)
+👉 [실행하러 가기](https://junixion-medrisk.streamlit.app/)
 
 ## 📂 주요 기능
 - ✅ XGBoost 기반 의료비 예측
