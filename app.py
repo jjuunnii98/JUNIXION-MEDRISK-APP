@@ -18,9 +18,15 @@ from model.utils import (
 )
 
 # ✅ 한글 폰트 설정 (Streamlit Cloud 대응)
-font_path = "./fonts/NanumGothic.ttf"
-font_prop = fm.FontProperties(fname=font_path)
-plt.rcParams["font.family"] = font_prop.get_name()
+try:
+    font_path = "./fonts/NanumGothic.ttf"
+    if os.path.exists(font_path):
+        font_prop = fm.FontProperties(fname=font_path)
+        plt.rcParams["font.family"] = font_prop.get_name()
+    else:
+        plt.rcParams["font.family"] = "DejaVu Sans"  # fallback
+except Exception as e:
+    st.warning(f"⚠️ 폰트 설정 오류: {e}")
 
 # ✅ 기본 설정
 st.set_page_config(page_title="JUNIXION - 의료비 예측", layout="wide")
