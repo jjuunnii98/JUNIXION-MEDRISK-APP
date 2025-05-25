@@ -1,7 +1,7 @@
 # 🧠 JUNIXION MedRisk.AI
 
 **AI 기반 암환자 맞춤형 의료비 예측 및 보험사 추천 시스템**  
-AI-Powered Medical Cost Prediction & Insurance Recommendation Platform for Cancer Patients
+**AI-Powered Medical Cost Prediction & Insurance Recommendation Platform for Cancer Patients**
 
 ![Streamlit](https://img.shields.io/badge/Deployed%20with-Streamlit-orange)
 ![XGBoost](https://img.shields.io/badge/Model-XGBoost-blue)
@@ -11,17 +11,18 @@ AI-Powered Medical Cost Prediction & Insurance Recommendation Platform for Cance
 
 ## 🔍 프로젝트 개요 | Project Overview
 
-**JUNIXION MedRisk.AI**는 공공 의료데이터와 보험통계를 기반으로  
-개인의 암종, 성별, 연령, 소득, 병원유형, 거주지역 등의 입력을 통해  
-예상 의료비를 **AI 모델(XGBoost)**로 예측하고,  
-부담률 기반 위험등급을 도출하여 **적절한 보험사**를 추천하는  
-**헬스케어 기반 AI 서비스 플랫폼**입니다.
+**JUNIXION MedRisk.AI**는 공공 의료데이터와 보험통계를 바탕으로  
+사용자의 암종, 성별, 연령대, 가족력, 진료유형, 소득, 병원유형, 거주지역 등을 입력받아  
+**AI 모델(XGBoost)**을 통해 예상 의료비를 예측하고  
+연소득 대비 부담률을 기반으로 **5단계 위험등급**을 부여하며  
+이에 따라 **사용자 맞춤형 보험사**를 추천하는  
+**스마트 헬스케어 예측 및 추천 플랫폼**입니다.
 
-**JUNIXION MedRisk.AI** is an AI-powered healthcare platform  
-that predicts medical costs for cancer patients based on personal inputs  
-(age, cancer type, income, region, hospital type) using **XGBoost**,  
-and recommends insurance companies based on the risk level  
-calculated from the burden-to-income ratio.
+**JUNIXION MedRisk.AI** is an AI-driven healthcare prediction platform  
+that estimates expected medical costs for cancer patients using personal data  
+(e.g., cancer type, gender, age group, family history, region, hospital type, income)  
+via an **XGBoost model**, evaluates a 5-level **risk score** based on cost burden,  
+and recommends suitable insurance companies accordingly.
 
 ---
 
@@ -29,34 +30,35 @@ calculated from the burden-to-income ratio.
 
 | 데이터 종류 (Data Type)         | 출처 (Source)                                       | 설명 (Description)                                     |
 |------------------------------|----------------------------------------------------|------------------------------------------------------|
-| 암종별 진료비/입원일수       | 건강보험심사평가원 (HIRA)                           | 암종별 인당 진료비 및 입원일수 통계                    |
-| 병원유형별 진료비            | 건강보험심사평가원 (HIRA)                           | 병원 유형에 따른 단가 보정계수                          |
-| 생명보험 가입자 통계         | 공공데이터포털 (금융위원회 제공)                   | 보험사명, 가입자수, 보험사 구분 포함                   |
-| 사용자 이력 로그             | Streamlit 상 사용자 입력값 기록                    | 위험등급 이력을 기반으로 히트맵 시각화에 활용            |
+| 암종별 진료비/입원일수       | 건강보험심사평가원 (HIRA)                           | 암종별 인당 진료비 및 평균 입원일수 통계               |
+| 병원유형별 진료비            | 건강보험심사평가원 (HIRA)                           | 병원 유형별 평균 단가 및 보정계수                      |
+| 생명보험 가입자 통계         | 공공데이터포털 (금융위원회 제공)                   | 보험사별 가입자수, 보험사 규모, 보장 유형 등            |
+| 사용자 이력 로그             | 앱 사용자의 입력 로그                              | 위험도 히스토리 누적 기록 및 시각화에 활용됨            |
 
-All data are sourced from **trusted public institutions** in Korea  
-(e.g., [HIRA](https://www.hira.or.kr), [Data.go.kr](https://www.data.go.kr))  
-and preprocessed for model learning and visualization.
+All data is sourced from reliable public institutions in Korea  
+(e.g., [HIRA](https://www.hira.or.kr), [Data.go.kr](https://www.data.go.kr)),  
+and has been cleaned, transformed, and structured for model training and analytics.
 
 ---
 
 ## 🚀 배포 주소 | Demo App
 
-🔗 [앱 실행 (Run on Streamlit)](https://junixion-medrisk.streamlit.app/)
+🔗 [Click to Run on Streamlit](https://junixion-medrisk.streamlit.app/)
 
 ---
 
 ## ✅ 주요 기능 | Key Features
 
-- 🎯 **XGBoost 기반 의료비 예측 (XGBoost-Based Medical Cost Prediction)**
-- 📊 병원 유형 보정계수 적용 (Hospital Cost Adjustment Factor)
-- 💰 연소득 대비 부담률 계산 (Cost Burden Ratio Calculation)
-- 🧭 5단계 위험등급 + 게이지 시각화 (5-Level Risk Grading + Gauge Visualization)
-- 🔍 SHAP 모델 해석 시각화 (SHAP Explainability for AI Model)
-- 🧬 사용자 입력 기반 히스토리 시각화 (User History Heatmap)
-- 🛡️ 위험도 기반 보험사 추천 알고리즘 (Insurance Recommendation based on Risk Level)
-- 💬 피드백 텍스트 저장 기능 (Feedback Input Logging)
-- 📱 모바일 반응형 레이아웃 (Mobile Responsive UI)
+- 🎯 **AI 예측: XGBoost 기반 의료비 예측 (AI-Powered Medical Cost Estimation)**
+- 🏥 병원유형 보정계수 적용 (Hospital Adjustment Factor Integration)
+- 💰 부담률 계산 및 5단계 위험등급 산정 (Cost Burden Ratio & 5-Level Risk Grading)
+- 📊 **SHAP 기반 변수 기여도 시각화** (SHAP Model Explainability Visualization)
+- 🧬 입력 이력 기반 히트맵 생성 (Heatmap of Risk History by Region/Age)
+- 🛡️ **위험도 기반 보험사 추천 알고리즘** (Risk-Aware Insurance Recommendation)
+- 🎛️ 보험사 필터링: **보장유형, 보험료 수준, 모바일 가입 여부** 기준으로 조건 검색
+- 📱 **모바일 반응형 UI 지원** (Responsive Design for Mobile Use)
+- 💬 사용자 피드백 기록 기능 (Feedback Input Logging)
+- 🔒 개인정보 저장 없이 예측만 제공 (No Personal Data Stored)
 
 ---
 
@@ -67,7 +69,7 @@ and preprocessed for model learning and visualization.
 | Backend          | Python, pandas, XGBoost                     |
 | Frontend         | Streamlit                                   |
 | Visualization    | matplotlib, seaborn, plotly, SHAP           |
-| Model Explainability | SHAP                                   |
+| Explainability   | SHAP for feature contribution analysis       |
 | Deployment       | Streamlit Cloud                             |
 | Version Control  | GitHub                                      |
 
@@ -77,23 +79,32 @@ and preprocessed for model learning and visualization.
 
 ```bash
 junixion_medrisk_app/
-├── app.py                    # 메인 Streamlit 앱 | Main application
-├── requirements.txt          # 의존성 패키지 목록 | Python dependencies
+├── app.py                      # Main Streamlit App
+├── requirements.txt            # Python dependencies
 ├── model/
-│   └── xgb_model.json        # 학습된 모델 | Trained model
+│   └── xgb_model.json          # Trained XGBoost model
 ├── data/
-│   ├── t1.xlsx               # 암종별 통계 | Cancer cost data
-│   ├── t2.xlsx               # 소득/연령 통계 | Income/age data
-│   ├── t3.xlsx               # 병원 유형 데이터 | Hospital cost stats
-│   └── life_insurance_general.json  # 보험사 가입자 통계 | Insurance statistics
+│   ├── t1.xlsx                 # Cancer stats by type
+│   ├── t2.xlsx                 # Age/Income data
+│   ├── t3.xlsx                 # Hospital-type cost stats
+│   └── life_insurance_general.json  # Insurance statistics
 ├── user_logs/
-│   └── risk_history.csv      # 사용자 위험 이력 | User log
+│   └── risk_history.csv        # Log of user risk score history
+├── fonts/
+│   └── NanumGothic.ttf         # Korean font for SHAP/Matplotlib
+├── model/
+│   └── predictor.py            # AI inference logic
+│   └── utils.py                # Data loading, insurance filtering, logger
+
 
 📮 문의 및 기여 | Contact & Contribution
 
-이 프로젝트는 연구 및 공모전 제출을 위한 목적으로 개발되었습니다.
-프로젝트 개선, 제휴 또는 연구 협업 문의는 GitHub Issue 또는 이메일로 연락 바랍니다.
+이 프로젝트는 연구, 학술, 공모전 제출 목적의 비상업적 프로젝트입니다.
+기술 기여, 피드백, 공동연구 또는 제품화를 위한 협업 제안은
+GitHub Issue 또는 이메일을 통해 연락 주시기 바랍니다.
 
-This project is designed for public health research and competition submission.
-For collaborations or improvements, feel free to open an issue or contact the maintainer.
+This project is non-commercial and intended for research & competition use.
+We welcome any technical contributions, feedback, or collaborative inquiries.
+Please reach out via GitHub Issues or email.
 
+⸻
