@@ -20,11 +20,12 @@ def load_data_sources_safe():
     암종, 소득, 병원유형, 보험사 데이터 로드 (예외처리 강화)
     """
     try:
-        df_t1 = pd.read_excel("/Volumes/JUNIXION/2.Contest_list/2.Healthcare_Startup/document/t1.xlsx")
-        df_t2 = pd.read_excel("/Volumes/JUNIXION/2.Contest_list/2.Healthcare_Startup/document/df_t2.xlsx")
-        df_t3 = pd.read_excel("/Volumes/JUNIXION/2.Contest_list/2.Healthcare_Startup/document/t3.xlsx")
+        # ✅ 상대경로로 수정
+        df_t1 = pd.read_excel("data/t1.xlsx")
+        df_t2 = pd.read_excel("data/t2.xlsx")
+        df_t3 = pd.read_excel("data/t3.xlsx")
 
-        with open("/Volumes/JUNIXION/2.Contest_list/2.Healthcare_Startup/document/life_insurance_general.json", "r", encoding="utf-8") as f:
+        with open("data/life_insurance_general.json", "r", encoding="utf-8") as f:
             raw_json = json.load(f)
 
         try:
@@ -58,6 +59,7 @@ def load_data_sources_safe():
 
     except Exception as e:
         raise RuntimeError(f"[load_data_sources 오류] {e}")
+
 
 def recommend_insurance_company(risk_level: str, df: pd.DataFrame) -> pd.DataFrame:
     """
