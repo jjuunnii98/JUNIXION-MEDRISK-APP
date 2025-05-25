@@ -18,11 +18,11 @@
 이에 따라 **사용자 맞춤형 보험사**를 추천하는  
 **스마트 헬스케어 예측 및 추천 플랫폼**입니다.
 
-**JUNIXION MedRisk.AI** is an AI-driven healthcare prediction platform  
-that estimates expected medical costs for cancer patients using personal data  
-(e.g., cancer type, gender, age group, family history, region, hospital type, income)  
-via an **XGBoost model**, evaluates a 5-level **risk score** based on cost burden,  
-and recommends suitable insurance companies accordingly.
+**JUNIXION MedRisk.AI** is an AI-powered platform  
+that predicts expected medical costs for cancer patients  
+based on user information (cancer type, age, gender, region, hospital type, income, etc.),  
+calculates the cost burden ratio, assigns a **5-level risk grade**,  
+and recommends **insurance companies** tailored to the user.
 
 ---
 
@@ -35,30 +35,32 @@ and recommends suitable insurance companies accordingly.
 | 생명보험 가입자 통계         | 공공데이터포털 (금융위원회 제공)                   | 보험사별 가입자수, 보험사 규모, 보장 유형 등            |
 | 사용자 이력 로그             | 앱 사용자의 입력 로그                              | 위험도 히스토리 누적 기록 및 시각화에 활용됨            |
 
-All data is sourced from reliable public institutions in Korea  
-(e.g., [HIRA](https://www.hira.or.kr), [Data.go.kr](https://www.data.go.kr)),  
-and has been cleaned, transformed, and structured for model training and analytics.
+> ⚠️ **주의: 본 프로젝트는 실제 개인정보 없이 구성된 가상 데이터셋(모의 데이터)을 기반으로 개발되었습니다.**  
+> 서비스에서 사용되는 모든 입력은 익명이며, 실제 의료진단이나 보험설계 대체 수단이 아닙니다.
+
+> ⚠️ **Disclaimer: This project uses mock/virtual datasets without real personal data.**  
+> The platform is for academic and demonstration purposes only and does not replace professional medical or insurance advice.
 
 ---
 
-## 🚀 배포 주소 | Demo App
+## 🚀 배포 주소 | Live App
 
-🔗 [Click to Run on Streamlit](https://junixion-medrisk.streamlit.app/)
+🔗 [Click to Open the Streamlit App](https://junixion-medrisk.streamlit.app/)
 
 ---
 
 ## ✅ 주요 기능 | Key Features
 
 - 🎯 **AI 예측: XGBoost 기반 의료비 예측 (AI-Powered Medical Cost Estimation)**
-- 🏥 병원유형 보정계수 적용 (Hospital Adjustment Factor Integration)
-- 💰 부담률 계산 및 5단계 위험등급 산정 (Cost Burden Ratio & 5-Level Risk Grading)
-- 📊 **SHAP 기반 변수 기여도 시각화** (SHAP Model Explainability Visualization)
-- 🧬 입력 이력 기반 히트맵 생성 (Heatmap of Risk History by Region/Age)
-- 🛡️ **위험도 기반 보험사 추천 알고리즘** (Risk-Aware Insurance Recommendation)
-- 🎛️ 보험사 필터링: **보장유형, 보험료 수준, 모바일 가입 여부** 기준으로 조건 검색
-- 📱 **모바일 반응형 UI 지원** (Responsive Design for Mobile Use)
-- 💬 사용자 피드백 기록 기능 (Feedback Input Logging)
-- 🔒 개인정보 저장 없이 예측만 제공 (No Personal Data Stored)
+- 🏥 병원유형 보정계수 적용 (Hospital Cost Adjustment Integration)
+- 💰 부담률 계산 및 5단계 위험등급 산정 (Cost Burden Ratio & 5-Level Risk Scoring)
+- 📊 **SHAP 기반 변수 기여도 시각화** (Model Explainability via SHAP)
+- 🧬 입력 이력 기반 히트맵 시각화 (Risk History Heatmap by Region & Age)
+- 🛡️ **위험도 기반 보험사 추천 알고리즘** (Risk-Aware Insurance Matching)
+- 🎛️ 보험사 필터링: **보장유형 / 보험료 수준 / 모바일 가입 여부** 검색 지원
+- 📱 모바일 최적화 UI (Mobile-Responsive Streamlit App)
+- 💬 피드백 수집 기능 포함 (User Feedback Logging Supported)
+- 🔒 개인정보 저장 없음 (No Personal Data Stored or Tracked)
 
 ---
 
@@ -69,9 +71,9 @@ and has been cleaned, transformed, and structured for model training and analyti
 | Backend          | Python, pandas, XGBoost                     |
 | Frontend         | Streamlit                                   |
 | Visualization    | matplotlib, seaborn, plotly, SHAP           |
-| Explainability   | SHAP for feature contribution analysis       |
+| Explainability   | SHAP for feature importance visualization   |
 | Deployment       | Streamlit Cloud                             |
-| Version Control  | GitHub                                      |
+| Version Control  | Git + GitHub                                |
 
 ---
 
@@ -79,32 +81,39 @@ and has been cleaned, transformed, and structured for model training and analyti
 
 ```bash
 junixion_medrisk_app/
-├── app.py                      # Main Streamlit App
-├── requirements.txt            # Python dependencies
+├── app.py                      # 📌 Main Streamlit App (entry point)
+├── requirements.txt            # 📦 Python dependencies
 ├── model/
-│   └── xgb_model.json          # Trained XGBoost model
+│   ├── xgb_model.json          # 🎯 Trained XGBoost model
+│   ├── predictor.py            # 🔍 Prediction logic
+│   └── utils.py                # 🛠 Data loader & insurance logic
 ├── data/
-│   ├── t1.xlsx                 # Cancer stats by type
-│   ├── t2.xlsx                 # Age/Income data
-│   ├── t3.xlsx                 # Hospital-type cost stats
-│   └── life_insurance_general.json  # Insurance statistics
+│   ├── t1.xlsx                 # 📊 Cancer data by type
+│   ├── t2.xlsx                 # 📊 Age & income stats
+│   ├── t3.xlsx                 # 📊 Hospital-type cost data
+│   └── life_insurance_general.json  # 🛡️ Insurance company data
 ├── user_logs/
-│   └── risk_history.csv        # Log of user risk score history
+│   └── risk_history.csv        # 🧬 Risk grade history log
 ├── fonts/
-│   └── NanumGothic.ttf         # Korean font for SHAP/Matplotlib
-├── model/
-│   └── predictor.py            # AI inference logic
-│   └── utils.py                # Data loading, insurance filtering, logger
-
+│   └── NanumGothic.ttf         # 🗂️ Korean font for plots
 
 📮 문의 및 기여 | Contact & Contribution
 
-이 프로젝트는 연구, 학술, 공모전 제출 목적의 비상업적 프로젝트입니다.
-기술 기여, 피드백, 공동연구 또는 제품화를 위한 협업 제안은
-GitHub Issue 또는 이메일을 통해 연락 주시기 바랍니다.
+본 프로젝트는 공모전 제출, 연구 발표, 프로토타입 용도로 개발된 비상업적 데모입니다.
+기술 기여, 피드백, 공동연구 또는 제품화 제안은 아래 방법으로 연락 주세요:
 
-This project is non-commercial and intended for research & competition use.
-We welcome any technical contributions, feedback, or collaborative inquiries.
-Please reach out via GitHub Issues or email.
+This project is non-commercial and built for academic & competition purposes.
+We welcome feedback, contributions, or productization discussions:
+	•	GitHub Issue 등록
+	•	이메일 문의 (✉️ 프로젝트 팀에 직접 연락)
 
 ⸻
+
+🔒 Note: All user inputs are processed in-memory. No personally identifiable information (PII) is collected or stored.
+🧪 Disclaimer: This is a prototype for demo/research use only — not a licensed medical tool.
+
+✅ 최종 수정일: 2025-05-24
+© 2025 JUNIXION Team. All rights reserved.
+---
+
+필요 시 `.md` 파일 형태로 저장해드릴 수도 있고, PDF/한글 버전도 제작 가능합니다. 원하시면 말씀해 주세요!
