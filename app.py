@@ -1,5 +1,3 @@
-# app.py (최종 수정본: SHAP/시각화 축소 및 centered 레이아웃)
-
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -17,7 +15,7 @@ from model.utils import (
     log_risk_score
 )
 
-# ✅ 한글 폰트 설정
+# ✅ Set Korean font (fallback to DejaVu Sans)
 try:
     font_path = "./fonts/NanumGothic.ttf"
     if os.path.exists(font_path):
@@ -26,12 +24,12 @@ try:
     else:
         plt.rcParams['font.family'] = 'DejaVu Sans'
 except Exception as e:
-    st.warning(f"⚠️ 폰트 설정 오류: {e}")
+    st.warning(f"⚠️ Font error: {e}")
 
-# ✅ 페이지 기본 설정 (wide → centered)
+# ✅ Page setup
 st.set_page_config(page_title="JUNIXION MedRisk.AI", layout="centered")
 st.title("JUNIXION MedRisk.AI")
-st.caption("AI 기반 암환자 맞춤형 의료비 예측 및 보험사 추천 시스템")
+st.caption("AI-powered cancer cost prediction & insurance recommendation")
 
 @st.cache_data
 def load_all_data():
@@ -39,14 +37,14 @@ def load_all_data():
 
 df_t1, df_t2, df_t3, insurance_df = load_all_data()
 
-# ✅ 데이터 전처리
+# ✅ Preprocessing
 df_t1.columns = df_t1.iloc[1]
 df_t1 = df_t1[2:].copy()
 df_t1 = df_t1.rename(columns={
-    "명칭": "암종명", "인당진료비": "인당진료비",
-    "인당입(내)원일수": "인당입원일수", "진료인원": "진료인원"
+    "명칭": "Cancer Type", "인당진료비": "Cost per Person",
+    "인당입(내)원일수": "Days per Patient", "진료인원": "Patients"
 })
-df_t1["암종명"] = df_t1["암종명"].astype(str)
+df_t1["Cancer Type"] = df_t1["Cancer Type"].astype(str)
 
 if "correction_factor" not in df_t3.columns:
     df_t3["cost_per_person"] = pd.to_numeric(df_t3["내원일당진료비"], errors="coerce")
@@ -54,30 +52,30 @@ if "correction_factor" not in df_t3.columns:
     df_t3["correction_factor"] = df_t3["cost_per_person"] / df_t3["cost_per_person"].mean()
 
 insurance_df["인원수"] = pd.to_numeric(insurance_df.get("인원수", 0), errors="coerce").fillna(0)
-insurance_df["보험사명"] = insurance_df.get("보험사명", "이름없음")
+insurance_df["보험사명"] = insurance_df.get("보험사명", "Unnamed")
 
-# ✅ 사용자 입력
-with st.expander("📥 사용자 정보 입력", expanded=True):
+# ✅ User Input
+with st.expander("📥 Enter your information", expanded=True):
     col1, col2 = st.columns(2)
     with col1:
-        cancer_type = st.selectbox("암종 선택", df_t1["암종명"].dropna().unique())
-        gender = st.radio("성별", ["남성", "여성"], horizontal=True)
-        region = st.selectbox("거주 지역", ["서울", "경기", "인천", "부산", "기타"])
-        age_group = st.selectbox("연령대", ["20대", "30대", "40대", "50대", "60대이상"])
-        is_inpatient = st.radio("진료 유형", ["외래", "입원"], horizontal=True)
-        is_inpatient = 1 if is_inpatient == "입원" else 0
-        family_history = st.radio("가족력 여부", ["없음", "있음"], horizontal=True)
-        family_history = 1 if family_history == "있음" else 0
-        annual_income = st.number_input("예상 연소득 (원)", 1_000_000, 100_000_000, 30_000_000, step=500_000)
+        cancer_type = st.selectbox("Cancer Type", df_t1["Cancer Type"].dropna().unique())
+        gender = st.radio("Gender", ["Male", "Female"], horizontal=True)
+        region = st.selectbox("Region", ["Seoul", "Gyeonggi", "Incheon", "Busan", "Other"])
+        age_group = st.selectbox("Age Group", ["20s", "30s", "40s", "50s", "60+"])
+        is_inpatient = st.radio("Treatment Type", ["Outpatient", "Inpatient"], horizontal=True)
+        is_inpatient = 1 if is_inpatient == "Inpatient" else 0
+        family_history = st.radio("Family History", ["No", "Yes"], horizontal=True)
+        family_history = 1 if family_history == "Yes" else 0
+        annual_income = st.number_input("Annual Income (KRW)", 1_000_000, 100_000_000, 30_000_000, step=500_000)
     with col2:
-        hospital_type = st.selectbox("병원 유형", df_t3["hospital_type"].dropna().unique())
-        cancer_row = df_t1[df_t1["암종명"] == cancer_type]
-        avg_days = float(cancer_row["인당입원일수"].values[0]) if not cancer_row.empty else 7.0
-        patient_count = int(cancer_row["진료인원"].values[0]) if not cancer_row.empty else 4000
-        cancer_cost = int(str(cancer_row["인당진료비"].values[0]).replace(",", "").replace("원", "")) if not cancer_row.empty else 1_000_000
+        hospital_type = st.selectbox("Hospital Type", df_t3["hospital_type"].dropna().unique())
+        cancer_row = df_t1[df_t1["Cancer Type"] == cancer_type]
+        avg_days = float(cancer_row["Days per Patient"].values[0]) if not cancer_row.empty else 7.0
+        patient_count = int(cancer_row["Patients"].values[0]) if not cancer_row.empty else 4000
+        cancer_cost = int(str(cancer_row["Cost per Person"].values[0]).replace(",", "").replace("원", "")) if not cancer_row.empty else 1_000_000
 
-# ✅ 예측 및 시각화
-if st.button("의료예측 및 보험 추천"):
+# ✅ Prediction
+if st.button("Predict Medical Cost & Recommend Insurance"):
     try:
         user_input = {
             "age_group": age_group,
@@ -92,7 +90,7 @@ if st.button("의료예측 및 보험 추천"):
             "family_history": family_history
         }
 
-        st.markdown("#### 입력값 확인")
+        st.markdown("#### Input Summary")
         st.json(user_input)
 
         result_dict = predict_medical_cost(user_input, df_t3, model_path="./model/xgb_model.json")
@@ -102,15 +100,15 @@ if st.button("의료예측 및 보험 추천"):
         score = risk_score_map.get(result_dict["위험등급"], 0)
         log_risk_score(region, age_group, score)
 
-        st.subheader("예측 결과")
-        st.table(pd.DataFrame(result_dict.items(), columns=["항목", "값"]))
+        st.subheader("Prediction Result")
+        st.table(pd.DataFrame(result_dict.items(), columns=["Metric", "Value"]))
 
-        # ✅ 게이지 차트
-        st.subheader("위험등급 점수")
+        # ✅ Risk Gauge
+        st.subheader("Risk Level Score")
         fig_gauge = go.Figure(go.Indicator(
             mode="gauge+number",
             value=score,
-            title={'text': "위험등급"},
+            title={'text': "Risk Level"},
             gauge={
                 'axis': {'range': [0, 100]},
                 'bar': {'color': "darkred"},
@@ -123,20 +121,20 @@ if st.button("의료예측 및 보험 추천"):
                 ],
             }
         ))
-        st.plotly_chart(fig_gauge, use_container_width=False)  # 🔽 폭 제한
+        st.plotly_chart(fig_gauge, use_container_width=False)
 
-        # ✅ SHAP 시각화
-        st.subheader("SHAP 변수 영향력")
+        # ✅ SHAP Chart
+        st.subheader("SHAP Feature Impact")
         try:
             explainer = shap.Explainer(booster)
             shap_values = explainer(X_input)
             shap_vals = shap_values.values[0]
             feature_names = X_input.columns.tolist()
 
-            fig, ax = plt.subplots(figsize=(2.5, 1.5))  # 🔽 축소
+            fig, ax = plt.subplots(figsize=(2.5, 1.5))
             colors = ['#FF6384' if val > 0 else '#36A2EB' for val in shap_vals]
             bars = ax.barh(feature_names, shap_vals, color=colors)
-            ax.set_title("SHAP 영향도", fontsize=9)
+            ax.set_title("SHAP Impact", fontsize=9)
             ax.tick_params(labelsize=7)
             for i, (bar, val) in enumerate(zip(bars, shap_vals)):
                 xpos = bar.get_width()
@@ -145,39 +143,39 @@ if st.button("의료예측 및 보험 추천"):
             plt.tight_layout()
             st.pyplot(fig, use_container_width=False)
         except Exception as e:
-            st.warning(f"SHAP 시각화 오류: {e}")
+            st.warning(f"SHAP Error: {e}")
 
-        # ✅ 요약 바 차트
-        st.subheader("예측 진료비 vs 연소득")
+        # ✅ Summary Bar Chart
+        st.subheader("Estimated Cost vs Income")
         fig1, ax1 = plt.subplots(figsize=(2.5, 1.8))
-        labels = ["예측 진료비", "연소득"]
+        labels = ["Estimated Cost", "Income"]
         values = [result_dict["raw_cost"], result_dict["raw_income"]]
         colors = ["#FF9999", "#99CCFF"]
         ax1.bar(labels, values, color=colors)
         for i, v in enumerate(values):
             ax1.text(i, v + v * 0.01, f"{v:,}", ha='center', fontsize=8)
-        ax1.set_ylabel("금액 (원)")
+        ax1.set_ylabel("KRW")
         st.pyplot(fig1, use_container_width=False)
 
-        # ✅ 보험사 추천
-        st.subheader("추천 보험사")
+        # ✅ Insurance Recommendation
+        st.subheader("Recommended Insurance Companies")
         try:
             recommended = recommend_insurance_company(result_dict["위험등급"], insurance_df)
             if recommended.empty:
-                st.info("조건에 맞는 보험사가 없습니다.")
+                st.info("No matching insurance companies.")
             else:
-                with st.expander("🔍 보험사 필터링"):
+                with st.expander("🔍 Filter Options"):
                     colf1, colf2, colf3 = st.columns(3)
                     with colf1:
-                        selected_type = st.selectbox("보장유형", ["전체"] + list(recommended["보장유형"].dropna().astype(str).unique()))
+                        selected_type = st.selectbox("Type", ["All"] + list(recommended["보장유형"].dropna().astype(str).unique()))
                     with colf2:
-                        selected_price = st.selectbox("보험료 수준", ["전체"] + list(recommended["평균보험료"].dropna().astype(str).unique()))
+                        selected_price = st.selectbox("Price Level", ["All"] + list(recommended["평균보험료"].dropna().astype(str).unique()))
                     with colf3:
-                        mobile_only = st.checkbox("모바일 가입 가능만 보기")
+                        mobile_only = st.checkbox("Mobile only")
 
-                    if selected_type != "전체":
+                    if selected_type != "All":
                         recommended = recommended[recommended["보장유형"] == selected_type]
-                    if selected_price != "전체":
+                    if selected_price != "All":
                         recommended = recommended[recommended["평균보험료"] == selected_price]
                     if mobile_only:
                         recommended = recommended[recommended["모바일가입"] == True]
@@ -186,18 +184,17 @@ if st.button("의료예측 및 보험 추천"):
                 recommended["인원수"] = recommended["인원수"].apply(lambda x: f"{x:,}")
                 st.dataframe(recommended[["보험사명", "보장유형", "평균보험료", "모바일가입", "민원률", "보험사규모", "인원수"]]
                              .sort_values(by="인원수", ascending=False).reset_index(drop=True))
-
         except Exception as e:
-            st.error(f"보험사 추천 오류: {e}")
+            st.error(f"Insurance recommendation error: {e}")
 
     except Exception as e:
-        st.error(f"❌ 예측 중 오류 발생: {e}")
+        st.error(f"❌ Prediction error: {e}")
 
-# ✅ 피드백 입력
+# ✅ Feedback
 st.markdown("---")
-st.subheader("📣 사용자 피드백")
-feedback = st.text_area("시스템에 대한 의견을 남겨주세요:")
-if st.button("피드백 제출"):
+st.subheader("📣 Feedback")
+feedback = st.text_area("Please share your thoughts or suggestions:")
+if st.button("Submit Feedback"):
     with open("feedback_log.txt", "a", encoding="utf-8") as f:
         f.write(f"{feedback}\n")
-    st.success("감사합니다! 피드백이 제출되었습니다.")
+    st.success("Thanks for your feedback!")
