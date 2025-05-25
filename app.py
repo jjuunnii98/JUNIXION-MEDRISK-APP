@@ -15,7 +15,7 @@ from model.utils import (
     log_risk_score
 )
 
-# ✅ Set Korean font (fallback to DejaVu Sans)
+# ✅ Korean font (fallback)
 try:
     font_path = "./fonts/NanumGothic.ttf"
     if os.path.exists(font_path):
@@ -76,119 +76,131 @@ with st.expander("📥 Enter your information", expanded=True):
 
 # ✅ Prediction
 if st.button("Predict Medical Cost & Recommend Insurance"):
-    try:
-        user_input = {
-            "age_group": age_group,
-            "avg_days": avg_days,
-            "is_inpatient": is_inpatient,
-            "patient_count": patient_count,
-            "hospital_type": hospital_type,
-            "annual_income": annual_income,
-            "cancer_cost": cancer_cost,
-            "cancer_name": cancer_type,
-            "region": region,
-            "family_history": family_history
-        }
-
-        st.markdown("#### Input Summary")
-        st.json(user_input)
-
-        result_dict = predict_medical_cost(user_input, df_t3, model_path="./model/xgb_model.json")
-        booster = result_dict.pop("booster")
-        X_input = result_dict.pop("X_input")
-
-        score = risk_score_map.get(result_dict["위험등급"], 0)
-        log_risk_score(region, age_group, score)
-
-        st.subheader("Prediction Result")
-        st.table(pd.DataFrame(result_dict.items(), columns=["Metric", "Value"]))
-
-        # ✅ Risk Gauge
-        st.subheader("Risk Level Score")
-        fig_gauge = go.Figure(go.Indicator(
-            mode="gauge+number",
-            value=score,
-            title={'text': "Risk Level"},
-            gauge={
-                'axis': {'range': [0, 100]},
-                'bar': {'color': "darkred"},
-                'steps': [
-                    {'range': [0, 20], 'color': "#66BB6A"},
-                    {'range': [20, 40], 'color': "#9BE7C4"},
-                    {'range': [40, 60], 'color': "#FFF176"},
-                    {'range': [60, 80], 'color': "#FFB74D"},
-                    {'range': [80, 100], 'color': "#EF5350"}
-                ],
+    with st.spinner("🔍 Predicting..."):
+        try:
+            user_input = {
+                "age_group": age_group,
+                "avg_days": avg_days,
+                "is_inpatient": is_inpatient,
+                "patient_count": patient_count,
+                "hospital_type": hospital_type,
+                "annual_income": annual_income,
+                "cancer_cost": cancer_cost,
+                "cancer_name": cancer_type,
+                "region": region,
+                "family_history": family_history
             }
-        ))
-        st.plotly_chart(fig_gauge, use_container_width=False)
 
-        # ✅ SHAP Chart
-        st.subheader("SHAP Feature Impact")
-        try:
-            explainer = shap.Explainer(booster)
-            shap_values = explainer(X_input)
-            shap_vals = shap_values.values[0]
-            feature_names = X_input.columns.tolist()
+            st.markdown("#### Input Summary")
+            st.json(user_input)
 
-            fig, ax = plt.subplots(figsize=(2.5, 1.5))
-            colors = ['#FF6384' if val > 0 else '#36A2EB' for val in shap_vals]
-            bars = ax.barh(feature_names, shap_vals, color=colors)
-            ax.set_title("SHAP Impact", fontsize=9)
-            ax.tick_params(labelsize=7)
-            for i, (bar, val) in enumerate(zip(bars, shap_vals)):
-                xpos = bar.get_width()
-                ha = 'left' if xpos > 0 else 'right'
-                ax.text(xpos, bar.get_y() + bar.get_height()/2, f'{val:+.0f}', va='center', ha=ha, fontsize=6)
-            plt.tight_layout()
-            st.pyplot(fig, use_container_width=False)
+            result_dict = predict_medical_cost(user_input, df_t3, model_path="./model/xgb_model.json")
+            booster = result_dict.pop("booster")
+            X_input = result_dict.pop("X_input")
+
+            score = risk_score_map.get(result_dict["위험등급"], 0)
+            log_risk_score(region, age_group, score)
+
+            # ✅ Metric Cards
+            col_metric1, col_metric2, col_metric3 = st.columns(3)
+            col_metric1.metric("💰 Estimated Cost", f"{result_dict['raw_cost']:,} KRW")
+            col_metric2.metric("📉 Income", f"{result_dict['raw_income']:,} KRW")
+            col_metric3.metric("⚠️ Burden (%)", f"{result_dict['의료비 부담률 (%)']}%")
+
+            st.subheader("Prediction Details")
+            st.table(pd.DataFrame(result_dict.items(), columns=["Metric", "Value"]))
+
+            # ✅ Risk Gauge
+            st.subheader("Risk Level")
+            fig_gauge = go.Figure(go.Indicator(
+                mode="gauge+number",
+                value=score,
+                title={'text': "Risk Score"},
+                gauge={
+                    'axis': {'range': [0, 100]},
+                    'bar': {'color': "darkred"},
+                    'steps': [
+                        {'range': [0, 20], 'color': "#66BB6A"},
+                        {'range': [20, 40], 'color': "#9BE7C4"},
+                        {'range': [40, 60], 'color': "#FFF176"},
+                        {'range': [60, 80], 'color': "#FFB74D"},
+                        {'range': [80, 100], 'color': "#EF5350"}
+                    ],
+                }
+            ))
+            st.plotly_chart(fig_gauge, use_container_width=False)
+
+            # ✅ SHAP
+            st.subheader("SHAP Feature Impact")
+            try:
+                explainer = shap.Explainer(booster)
+                shap_values = explainer(X_input)
+                shap_vals = shap_values.values[0]
+                feature_names = X_input.columns.tolist()
+
+                fig, ax = plt.subplots(figsize=(2.5, 1.5))
+                colors = ['#FF6384' if val > 0 else '#36A2EB' for val in shap_vals]
+                bars = ax.barh(feature_names, shap_vals, color=colors)
+                ax.set_title("SHAP Impact", fontsize=9)
+                ax.tick_params(labelsize=7)
+                for i, (bar, val) in enumerate(zip(bars, shap_vals)):
+                    xpos = bar.get_width()
+                    ha = 'left' if xpos > 0 else 'right'
+                    ax.text(xpos, bar.get_y() + bar.get_height()/2, f'{val:+.0f}', va='center', ha=ha, fontsize=6)
+                plt.tight_layout()
+                st.pyplot(fig, use_container_width=False)
+
+                # ✅ Explanation Text
+                st.markdown("""
+                💡 **Interpretation**: Positive SHAP values increase predicted cost, negative ones reduce it.
+                Use this to understand what factors drive high medical costs for the patient.
+                """)
+            except Exception as e:
+                st.warning(f"SHAP Error: {e}")
+
+            # ✅ Summary Bar Chart
+            st.subheader("Estimated Cost vs Income")
+            fig1, ax1 = plt.subplots(figsize=(2.5, 1.8))
+            labels = ["Estimated Cost", "Income"]
+            values = [result_dict["raw_cost"], result_dict["raw_income"]]
+            colors = ["#FF9999", "#99CCFF"]
+            ax1.bar(labels, values, color=colors)
+            for i, v in enumerate(values):
+                ax1.text(i, v + v * 0.01, f"{v:,}", ha='center', fontsize=8)
+            ax1.set_ylabel("KRW")
+            st.pyplot(fig1, use_container_width=False)
+
+            # ✅ Insurance Recommendation
+            st.subheader("Recommended Insurance Companies")
+            try:
+                recommended = recommend_insurance_company(result_dict["위험등급"], insurance_df)
+                if recommended.empty:
+                    st.info("No matching insurance companies.")
+                else:
+                    with st.expander("🔍 Filter Options"):
+                        colf1, colf2, colf3 = st.columns(3)
+                        with colf1:
+                            selected_type = st.selectbox("Type", ["All"] + list(recommended["보장유형"].dropna().astype(str).unique()))
+                        with colf2:
+                            selected_price = st.selectbox("Price Level", ["All"] + list(recommended["평균보험료"].dropna().astype(str).unique()))
+                        with colf3:
+                            mobile_only = st.checkbox("Mobile only")
+
+                        if selected_type != "All":
+                            recommended = recommended[recommended["보장유형"] == selected_type]
+                        if selected_price != "All":
+                            recommended = recommended[recommended["평균보험료"] == selected_price]
+                        if mobile_only:
+                            recommended = recommended[recommended["모바일가입"] == True]
+
+                    recommended["인원수"] = pd.to_numeric(recommended["인원수"], errors="coerce").fillna(0).astype(int)
+                    recommended["인원수"] = recommended["인원수"].apply(lambda x: f"{x:,}")
+                    st.dataframe(recommended[["보험사명", "보장유형", "평균보험료", "모바일가입", "민원률", "보험사규모", "인원수"]]
+                                 .sort_values(by="인원수", ascending=False).reset_index(drop=True))
+            except Exception as e:
+                st.error(f"Insurance recommendation error: {e}")
         except Exception as e:
-            st.warning(f"SHAP Error: {e}")
-
-        # ✅ Summary Bar Chart
-        st.subheader("Estimated Cost vs Income")
-        fig1, ax1 = plt.subplots(figsize=(2.5, 1.8))
-        labels = ["Estimated Cost", "Income"]
-        values = [result_dict["raw_cost"], result_dict["raw_income"]]
-        colors = ["#FF9999", "#99CCFF"]
-        ax1.bar(labels, values, color=colors)
-        for i, v in enumerate(values):
-            ax1.text(i, v + v * 0.01, f"{v:,}", ha='center', fontsize=8)
-        ax1.set_ylabel("KRW")
-        st.pyplot(fig1, use_container_width=False)
-
-        # ✅ Insurance Recommendation
-        st.subheader("Recommended Insurance Companies")
-        try:
-            recommended = recommend_insurance_company(result_dict["위험등급"], insurance_df)
-            if recommended.empty:
-                st.info("No matching insurance companies.")
-            else:
-                with st.expander("🔍 Filter Options"):
-                    colf1, colf2, colf3 = st.columns(3)
-                    with colf1:
-                        selected_type = st.selectbox("Type", ["All"] + list(recommended["보장유형"].dropna().astype(str).unique()))
-                    with colf2:
-                        selected_price = st.selectbox("Price Level", ["All"] + list(recommended["평균보험료"].dropna().astype(str).unique()))
-                    with colf3:
-                        mobile_only = st.checkbox("Mobile only")
-
-                    if selected_type != "All":
-                        recommended = recommended[recommended["보장유형"] == selected_type]
-                    if selected_price != "All":
-                        recommended = recommended[recommended["평균보험료"] == selected_price]
-                    if mobile_only:
-                        recommended = recommended[recommended["모바일가입"] == True]
-
-                recommended["인원수"] = pd.to_numeric(recommended["인원수"], errors="coerce").fillna(0).astype(int)
-                recommended["인원수"] = recommended["인원수"].apply(lambda x: f"{x:,}")
-                st.dataframe(recommended[["보험사명", "보장유형", "평균보험료", "모바일가입", "민원률", "보험사규모", "인원수"]]
-                             .sort_values(by="인원수", ascending=False).reset_index(drop=True))
-        except Exception as e:
-            st.error(f"Insurance recommendation error: {e}")
-
-    except Exception as e:
-        st.error(f"❌ Prediction error: {e}")
+            st.error(f"❌ Prediction error: {e}")
 
 # ✅ Feedback
 st.markdown("---")
