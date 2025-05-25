@@ -1,4 +1,4 @@
-# 📁 predictor.py (SHAP booster 반환 + 사용자 이력 누적 저장 포함)
+# 📁 predictor.py (가족력 포함 + SHAP booster 반환 + 사용자 이력 누적 저장 포함)
 
 import numpy as np
 import pandas as pd
@@ -10,7 +10,6 @@ from datetime import datetime
 # ✅ 히트맵 누적 저장용 CSV 경로
 RISK_LOG_PATH = "./user_logs/risk_history.csv"
 os.makedirs(os.path.dirname(RISK_LOG_PATH), exist_ok=True)
-
 
 def predict_medical_cost(user_input: dict, df_hospital: pd.DataFrame, model_path: str) -> dict:
     """
@@ -34,6 +33,7 @@ def predict_medical_cost(user_input: dict, df_hospital: pd.DataFrame, model_path
         annual_income = float(user_input.get("annual_income"))
         cancer_name = user_input.get("cancer_name", "미지정 암종")
         region = user_input.get("region", "기타")  # 히트맵용 지역 필드
+        family_history = int(user_input.get("family_history", 0))  # ✅ 가족력
 
         if annual_income <= 0:
             raise ValueError("연소득은 0보다 커야 합니다.")
@@ -42,7 +42,8 @@ def predict_medical_cost(user_input: dict, df_hospital: pd.DataFrame, model_path
         X = pd.DataFrame([{
             "avg_days": avg_days,
             "is_inpatient": is_inpatient,
-            "patient_count": patient_count
+            "patient_count": patient_count,
+            "family_history": family_history  # ✅ 포함
         }])
         dmatrix = xgb.DMatrix(X)
 
